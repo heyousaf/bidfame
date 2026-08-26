@@ -6,700 +6,270 @@
 <title>BidFame — Live Leaderboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --gold: #F5C842;
-    --gold-glow: #F5C84233;
-    --silver: #B0B8C1;
-    --bronze: #CD7F32;
-    --bg: #0A0A0F;
-    --surface: #12121A;
-    --surface2: #1A1A26;
-    --border: #2A2A3A;
-    --text: #F0F0F8;
-    --muted: #6B6B8A;
-    --accent: #7C5CFC;
-    --accent-glow: #7C5CFC22;
-    --green: #22C55E;
-  }
-
-  body {
-    font-family: 'Space Grotesk', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Animated background grid */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(124,92,252,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(124,92,252,0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 0 1rem 4rem;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Header */
-  .header {
-    text-align: center;
-    padding: 3rem 0 2rem;
-  }
-
-  .logo-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--accent-glow);
-    border: 1px solid var(--accent);
-    border-radius: 100px;
-    padding: 6px 16px;
-    font-size: 12px;
-    font-family: 'Space Mono', monospace;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 1.5rem;
-  }
-
-  .logo-badge::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    animation: pulse-dot 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
-
-  .site-title {
-    font-size: clamp(2.5rem, 8vw, 4rem);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #fff 0%, #B09FFF 60%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .site-tagline {
-    font-size: 1rem;
-    color: var(--muted);
-    margin-bottom: 2rem;
-  }
-
-  /* Stats bar */
-  .stats-bar {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    margin-bottom: 2.5rem;
-    padding: 1rem 1.5rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-  }
-
-  .stat {
-    text-align: center;
-  }
-
-  .stat-value {
-    font-family: 'Space Mono', monospace;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 2px;
-  }
-
-  /* How it works */
-  .how-it-works {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 2rem;
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .how-icon {
-    font-size: 1.5rem;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  .how-text {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  .how-text strong {
-    color: var(--text);
-  }
-
-  /* Current bid highlight */
-  .current-bid-banner {
-    background: linear-gradient(135deg, var(--gold-glow), transparent);
-    border: 1px solid var(--gold);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .current-bid-banner::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(from 0deg, transparent 0deg, rgba(245,200,66,0.05) 60deg, transparent 120deg);
-    animation: rotate-glow 8s linear infinite;
-  }
-
-  @keyframes rotate-glow {
-    to { transform: rotate(360deg); }
-  }
-
-  .current-bid-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--gold);
-    margin-bottom: 0.5rem;
-    position: relative;
-  }
-
-  .current-bid-amount {
-    font-family: 'Space Mono', monospace;
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--gold);
-    position: relative;
-  }
-
-  .current-bid-name {
-    font-size: 1rem;
-    color: var(--muted);
-    margin-top: 0.25rem;
-    position: relative;
-  }
-
-  .beat-it-cta {
-    display: inline-block;
-    margin-top: 1rem;
-    background: var(--gold);
-    color: #0A0A0F;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 10px 24px;
-    border-radius: 100px;
-    text-decoration: none;
-    position: relative;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-
-  .beat-it-cta:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px var(--gold-glow);
-  }
-
-  /* Section title */
-  .section-title {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* Leaderboard */
-  .leaderboard {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 2rem;
-  }
-
-  .row {
-    display: grid;
-    grid-template-columns: 48px 1fr auto;
-    align-items: center;
-    gap: 12px;
-    padding: 1rem 1.25rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    transition: border-color 0.3s;
-    animation: slide-in 0.4s ease both;
-  }
-
-  @keyframes slide-in {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .row:nth-child(1) { animation-delay: 0.05s; border-color: var(--gold); background: linear-gradient(135deg, rgba(245,200,66,0.06), var(--surface)); }
-  .row:nth-child(2) { animation-delay: 0.1s; border-color: var(--silver); background: linear-gradient(135deg, rgba(176,184,193,0.06), var(--surface)); }
-  .row:nth-child(3) { animation-delay: 0.15s; border-color: var(--bronze); background: linear-gradient(135deg, rgba(205,127,50,0.06), var(--surface)); }
-  .row:nth-child(n+4) { animation-delay: calc(0.15s + (var(--i, 0) * 0.05s)); }
-
-  .rank {
-    text-align: center;
-  }
-
-  .rank-medal {
-    font-size: 1.5rem;
-    display: block;
-  }
-
-  .rank-num {
-    font-family: 'Space Mono', monospace;
-    font-size: 14px;
-    color: var(--muted);
-    font-weight: 700;
-  }
-
-  .bidder-info {}
-
-  .bidder-name {
-    font-weight: 600;
-    font-size: 15px;
-    color: var(--text);
-  }
-
-  .bidder-tag {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-
-  .bid-amount {
-    text-align: right;
-  }
-
-  .bid-usdt {
-    font-family: 'Space Mono', monospace;
-    font-weight: 700;
-    font-size: 15px;
-  }
-
-  .row:nth-child(1) .bid-usdt { color: var(--gold); }
-  .row:nth-child(2) .bid-usdt { color: var(--silver); }
-  .row:nth-child(3) .bid-usdt { color: var(--bronze); }
-  .row:nth-child(n+4) .bid-usdt { color: var(--accent); }
-
-  .bid-label {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-
-  /* Empty state */
-  .empty-row {
-    padding: 2rem;
-    text-align: center;
-    color: var(--muted);
-    font-size: 14px;
-    border: 1px dashed var(--border);
-    border-radius: 12px;
-  }
-
-  /* How to bid */
-  .bid-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-  }
-
-  .bid-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .bid-step {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-  }
-
-  .step-num {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--accent-glow);
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    font-size: 12px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-family: 'Space Mono', monospace;
-  }
-
-  .step-text {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.5;
-    padding-top: 4px;
-  }
-
-  .step-text strong {
-    color: var(--text);
-  }
-
-  .address-box {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 1rem;
-  }
-
-  .address-text {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    word-break: break-all;
-    flex: 1;
-  }
-
-  .copy-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--muted);
-    font-size: 12px;
-    padding: 4px 10px;
-    cursor: pointer;
-    font-family: 'Space Grotesk', sans-serif;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-
-  .copy-btn:hover {
-    color: var(--text);
-    border-color: var(--accent);
-  }
-
-  .copy-btn.copied {
-    color: var(--green);
-    border-color: var(--green);
-  }
-
-  .network-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(34,197,94,0.1);
-    border: 1px solid rgba(34,197,94,0.3);
-    border-radius: 100px;
-    padding: 4px 12px;
-    font-size: 12px;
-    color: var(--green);
-    font-family: 'Space Mono', monospace;
-    margin-bottom: 1rem;
-  }
-
-  .network-badge::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-  }
-
-  .rules-note {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.6;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-  }
-
-  /* Footer */
-  .footer {
-    text-align: center;
-    font-size: 12px;
-    color: var(--muted);
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-  }
-
-  .footer a {
-    color: var(--accent);
-    text-decoration: none;
-  }
-
-  /* Confetti canvas */
-  #confetti-canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 999;
-  }
-
-  /* Responsive */
-  @media (max-width: 480px) {
-    .stats-bar { gap: 1rem; }
-    .site-title { font-size: 2.5rem; }
-    .current-bid-amount { font-size: 2rem; }
-    .address-text { font-size: 9px; }
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#F5C842;--gold-glow:#F5C84233;--silver:#B0B8C1;--bronze:#CD7F32;
+  --bg:#0A0A0F;--surface:#12121A;--surface2:#1A1A26;--border:#2A2A3A;
+  --text:#F0F0F8;--muted:#6B6B8A;--accent:#7C5CFC;--accent-glow:#7C5CFC22;--green:#22C55E;
+}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(124,92,252,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,252,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+.wrap{max-width:680px;margin:0 auto;padding:0 1rem 4rem;position:relative;z-index:1}
+.header{text-align:center;padding:3rem 0 2rem}
+.live-badge{display:inline-flex;align-items:center;gap:8px;background:var(--accent-glow);border:1px solid var(--accent);border-radius:100px;padding:6px 16px;font-size:12px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.5rem}
+.live-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:pdot 2s ease-in-out infinite}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.site-title{font-size:clamp(2.5rem,8vw,4rem);font-weight:700;letter-spacing:-.03em;line-height:1;margin-bottom:.5rem;background:linear-gradient(135deg,#fff 0%,#B09FFF 60%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.site-tagline{font-size:1rem;color:var(--muted);margin-bottom:2rem}
+.stats-bar{display:flex;justify-content:center;gap:2rem;margin-bottom:2rem;padding:1rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.stat{text-align:center}
+.stat-value{font-family:'Space Mono',monospace;font-size:1.25rem;font-weight:700;color:var(--text)}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.hint-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:2rem;display:flex;gap:1rem;align-items:flex-start}
+.hint-box p{font-size:14px;color:var(--muted);line-height:1.6}
+.hint-box p strong{color:var(--text)}
+.top-banner{background:linear-gradient(135deg,var(--gold-glow),transparent);border:1px solid var(--gold);border-radius:16px;padding:1.5rem;margin-bottom:2rem;text-align:center;position:relative;overflow:hidden}
+.top-banner::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent 0deg,rgba(245,200,66,.05) 60deg,transparent 120deg);animation:rglow 8s linear infinite}
+@keyframes rglow{to{transform:rotate(360deg)}}
+.tb-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:.5rem;position:relative}
+.tb-amount{font-family:'Space Mono',monospace;font-size:2.5rem;font-weight:700;color:var(--gold);position:relative}
+.tb-name{font-size:1rem;color:var(--muted);margin-top:.25rem;position:relative}
+.beat-btn{display:inline-block;margin-top:1rem;background:var(--gold);color:#0A0A0F;font-weight:700;font-size:14px;padding:10px 24px;border-radius:100px;text-decoration:none;position:relative;transition:transform .2s,box-shadow .2s}
+.beat-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--gold-glow)}
+.sec-title{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.leaderboard{display:flex;flex-direction:column;gap:8px;margin-bottom:1.5rem;min-height:80px}
+.row{display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:12px;padding:1rem 1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;animation:slin .35s ease both}
+@keyframes slin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.row.rank1{border-color:var(--gold);background:linear-gradient(135deg,rgba(245,200,66,.06),var(--surface))}
+.row.rank2{border-color:var(--silver);background:linear-gradient(135deg,rgba(176,184,193,.06),var(--surface))}
+.row.rank3{border-color:var(--bronze);background:linear-gradient(135deg,rgba(205,127,50,.06),var(--surface))}
+.rank-medal{font-size:1.5rem;display:block;text-align:center}
+.rank-num{font-family:'Space Mono',monospace;font-size:14px;color:var(--muted);font-weight:700;text-align:center}
+.bidder-name{font-weight:600;font-size:15px;color:var(--text)}
+.bidder-tag{font-size:12px;color:var(--muted);margin-top:2px}
+.bid-usdt{font-family:'Space Mono',monospace;font-weight:700;font-size:15px;text-align:right}
+.row.rank1 .bid-usdt{color:var(--gold)}
+.row.rank2 .bid-usdt{color:var(--silver)}
+.row.rank3 .bid-usdt{color:var(--bronze)}
+.row:not(.rank1):not(.rank2):not(.rank3) .bid-usdt{color:var(--accent)}
+.bid-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;text-align:right}
+.empty-row{padding:2rem;text-align:center;color:var(--muted);font-size:14px;border:1px dashed var(--border);border-radius:12px}
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:2rem;flex-wrap:wrap}
+.pg-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;font-family:'Space Grotesk',sans-serif;padding:8px 14px;cursor:pointer;transition:all .2s}
+.pg-btn:hover:not(:disabled){color:var(--text);border-color:var(--accent)}
+.pg-btn.active{background:var(--accent-glow);border-color:var(--accent);color:var(--accent);font-weight:600}
+.pg-btn:disabled{opacity:.3;cursor:not-allowed}
+.pg-info{font-size:13px;color:var(--muted);font-family:'Space Mono',monospace;padding:0 4px}
+.bid-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:2rem}
+.bid-steps{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem}
+.bid-step{display:flex;gap:12px;align-items:flex-start}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Space Mono',monospace}
+.step-text{font-size:14px;color:var(--muted);line-height:1.5;padding-top:4px}
+.step-text strong{color:var(--text)}
+.step-text a{color:var(--accent)}
+.net-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:100px;padding:4px 12px;font-size:12px;color:var(--green);font-family:'Space Mono',monospace;margin-bottom:1rem}
+.net-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green)}
+.addr-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:1rem}
+.addr-text{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);word-break:break-all;flex:1}
+.copy-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:12px;padding:4px 10px;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:all .2s;white-space:nowrap}
+.copy-btn:hover{color:var(--text);border-color:var(--accent)}
+.copy-btn.copied{color:var(--green);border-color:var(--green)}
+.rules-note{font-size:12px;color:var(--muted);line-height:1.6;padding-top:1rem;border-top:1px solid var(--border)}
+.footer{text-align:center;font-size:12px;color:var(--muted);padding-top:1rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent);text-decoration:none}
+@media(max-width:480px){.stats-bar{gap:1rem}.tb-amount{font-size:2rem}.addr-text{font-size:9px}}
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<canvas id="confetti-canvas"></canvas>
-
-<div class="container">
-
-  <!-- Header -->
   <div class="header">
-    <div class="logo-badge">Live Leaderboard</div>
+    <div class="live-badge">Live Leaderboard</div>
     <h1 class="site-title">BidFame</h1>
     <p class="site-tagline">Bid more. Rank higher. Get famous.</p>
   </div>
 
-  <!-- Stats Bar -->
   <div class="stats-bar">
-    <div class="stat">
-      <div class="stat-value" id="stat-bidders">0</div>
-      <div class="stat-label">Bidders</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="stat-top-bid">$0</div>
-      <div class="stat-label">Top Bid</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="stat-next-bid">$1</div>
-      <div class="stat-label">Min to #1</div>
-    </div>
+    <div class="stat"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Bidders</div></div>
+    <div class="stat"><div class="stat-value" id="stat-top">$0</div><div class="stat-label">Top Bid</div></div>
+    <div class="stat"><div class="stat-value" id="stat-next">$1</div><div class="stat-label">Min to #1</div></div>
   </div>
 
-  <!-- How it works -->
-  <div class="how-it-works">
-    <div class="how-icon">💡</div>
-    <div class="how-text">
-      <strong>Bid $1 more than the current leader</strong> to claim the #1 spot. Your name/brand gets featured on the leaderboard, website, and Instagram story daily — until someone outbids you.
-    </div>
+  <div class="hint-box">
+    <div style="font-size:1.5rem;flex-shrink:0;margin-top:2px">💡</div>
+    <p><strong>Bid $1 more than the current leader</strong> to claim the #1 spot. Your name/brand gets featured on the leaderboard, website, and Instagram story daily — until someone outbids you.</p>
   </div>
 
-  <!-- Current Top Bidder Banner -->
-  <div id="top-banner" class="current-bid-banner" style="display:none;">
-    <div class="current-bid-label">👑 Current Leader</div>
-    <div class="current-bid-amount" id="banner-amount">$0</div>
-    <div class="current-bid-name" id="banner-name">—</div>
-    <a href="#how-to-bid" class="beat-it-cta">Beat this bid ↗</a>
+  <div id="top-banner" class="top-banner" style="display:none">
+    <div class="tb-label">👑 Current Leader</div>
+    <div class="tb-amount" id="tb-amount">—</div>
+    <div class="tb-name" id="tb-name">—</div>
+    <a href="#how-to-bid" class="beat-btn">Beat this bid ↗</a>
   </div>
 
-  <!-- Leaderboard -->
-  <div class="section-title">Live Rankings</div>
-  <div class="leaderboard" id="leaderboard-rows">
-    <div class="empty-row">No bids yet — be the first to claim #1 👑</div>
-  </div>
+  <div class="sec-title">Live Rankings</div>
+  <div class="leaderboard" id="lb"><div class="empty-row">No bids yet — be the first to claim #1 👑</div></div>
+  <div class="pagination" id="pg"></div>
 
-  <!-- How to Bid -->
   <div id="how-to-bid" class="bid-box">
-    <div class="section-title" style="margin-bottom:1.25rem;">How to bid</div>
-
+    <div class="sec-title" style="margin-bottom:1.25rem">How to bid</div>
     <div class="bid-steps">
-      <div class="bid-step">
-        <div class="step-num">1</div>
-        <div class="step-text">Check the <strong>current top bid</strong> above. You must send <strong>$1 more</strong> than that amount.</div>
-      </div>
-      <div class="bid-step">
-        <div class="step-num">2</div>
-        <div class="step-text">Send <strong>USDT (TRC-20)</strong> to the address below. Include your <strong>name or brand</strong> in the memo/note field.</div>
-      </div>
-      <div class="bid-step">
-        <div class="step-num">3</div>
-        <div class="step-text">DM the <strong>TXID (transaction ID)</strong> to <a href="https://instagram.com/bidfame" style="color:var(--accent);">@bidfame</a> on Instagram for verification.</div>
-      </div>
-      <div class="bid-step">
-        <div class="step-num">4</div>
-        <div class="step-text">Once verified, you're <strong>live on the leaderboard</strong> and featured on Instagram story!</div>
-      </div>
+      <div class="bid-step"><div class="step-num">1</div><div class="step-text">Check the <strong>current top bid</strong> above. Send <strong>$1 more</strong> than that amount.</div></div>
+      <div class="bid-step"><div class="step-num">2</div><div class="step-text">Send <strong>USDT (TRC-20)</strong> to the address below. Put your <strong>name or brand</strong> in the memo.</div></div>
+      <div class="bid-step"><div class="step-num">3</div><div class="step-text">DM the <strong>TXID</strong> to <a href="https://instagram.com/bidfame">@bidfame</a> on Instagram for manual verification.</div></div>
+      <div class="bid-step"><div class="step-num">4</div><div class="step-text">Once verified you're <strong>live on the leaderboard</strong> and featured on Instagram story!</div></div>
     </div>
-
-    <div class="network-badge">USDT · TRC-20 Network</div>
-
-    <div class="address-box">
-      <span class="address-text" id="wallet-address">YOUR_USDT_TRC20_ADDRESS_HERE</span>
-      <button class="copy-btn" onclick="copyAddress()">Copy</button>
+    <div class="net-badge">USDT · TRC-20 Network</div>
+    <div class="addr-box">
+      <span class="addr-text" id="wallet-addr">YOUR_USDT_TRC20_ADDRESS_HERE</span>
+      <button class="copy-btn" id="copy-btn" onclick="copyAddr()">Copy</button>
     </div>
-
-    <div class="rules-note">
-      ⚡ Bids are verified manually within 24 hours. No fixed end date — bidding runs indefinitely.
-      The #1 bidder gets daily Instagram story feature + leaderboard top spot until outbid.
-      Payments are non-refundable. Starting bid: <strong>$1 USDT</strong>.
-    </div>
+    <div class="rules-note">⚡ Bids verified manually within 24 hours. No fixed end date — bidding runs indefinitely. #1 bidder gets daily Instagram story feature until outbid. Payments non-refundable. Starting bid: <strong>$1 USDT</strong>.</div>
   </div>
 
-  <!-- Footer -->
   <div class="footer">
     <p>BidFame &mdash; <a href="https://instagram.com/bidfame">@bidfame</a> on Instagram</p>
-    <p style="margin-top:6px;">Leaderboard updates within 24hrs of payment verification.</p>
+    <p style="margin-top:6px">Leaderboard updates within 24hrs of payment verification.</p>
   </div>
 
 </div>
 
-<!-- Confetti -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.2/confetti.browser.min.js"></script>
-
 <script>
+
 // ============================================================
-// DATA — Edit this object to update the leaderboard
-// When you update the Google Sheet, also update this array.
-// Format: { rank, name, bid (number), tag (optional) }
+//  EDIT KARO — APNA WALLET ADDRESS YAHAN LIKHO
 // ============================================================
-const LEADERBOARD_DATA = [
-  // EXAMPLE DATA — replace with real bids
-  // { name: "CryptoKing Store", bid: 15, tag: "@cryptokingstore" },
-  // { name: "Ahmed Designs", bid: 12, tag: "@ahmeddesigns" },
-  // { name: "TechBro PK", bid: 8, tag: "@techbropk" },
+const WALLET = "YOUR_USDT_TRC20_ADDRESS_HERE";
+
+// ============================================================
+//  EDIT KARO — NAI ENTRY ADD KARO YA PURANI HATAO
+//  Jis ka bhi amount zyada hoga wo automatically #1 pe aayega
+//  Format: { name, tag, amount }
+//  tag optional hai — delete kar sakte ho agar chahein
+// ============================================================
+const ENTRIES = [
+  // EXAMPLE DATA — in sab ko apni real entries se replace karo
+  { name: "Bid Fame",  tag: "@Bidfame",  amount: 0 },
 ];
-
-const WALLET_ADDRESS = "YOUR_USDT_TRC20_ADDRESS_HERE";
-
 // ============================================================
-// Render
-// ============================================================
-const medals = ["🥇", "🥈", "🥉"];
 
-function render() {
-  const sorted = [...LEADERBOARD_DATA].sort((a, b) => b.bid - a.bid);
-  const container = document.getElementById('leaderboard-rows');
-  const topBanner = document.getElementById('top-banner');
+const PER_PAGE = 10;
+const MEDALS   = ['🥇','🥈','🥉'];
+let currentPage = 1;
 
-  // Stats
-  document.getElementById('stat-bidders').textContent = sorted.length;
-  const topBid = sorted.length ? sorted[0].bid : 0;
-  document.getElementById('stat-top-bid').textContent = '$' + topBid;
-  document.getElementById('stat-next-bid').textContent = '$' + (topBid + 1);
+// Sort karo — highest amount hamesha upar
+const sorted = [...ENTRIES].sort((a, b) => b.amount - a.amount);
+
+function init() {
+  // Wallet address set karo
+  document.getElementById('wallet-addr').textContent = WALLET;
+
+  const total  = sorted.length;
+  const topBid = total ? sorted[0].amount : 0;
+
+  // Stats update karo
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-top').textContent   = '$' + topBid;
+  document.getElementById('stat-next').textContent  = '$' + (topBid + 1);
 
   // Top banner
-  if (sorted.length > 0) {
-    topBanner.style.display = 'block';
-    document.getElementById('banner-amount').textContent = '$' + sorted[0].bid + ' USDT';
-    document.getElementById('banner-name').textContent = sorted[0].name + (sorted[0].tag ? ' · ' + sorted[0].tag : '');
-  } else {
-    topBanner.style.display = 'none';
+  if (total > 0) {
+    document.getElementById('top-banner').style.display = 'block';
+    document.getElementById('tb-amount').textContent = '$' + sorted[0].amount + ' USDT';
+    document.getElementById('tb-name').textContent   =
+      sorted[0].name + (sorted[0].tag ? ' · ' + sorted[0].tag : '');
   }
 
-  // Rows
+  renderPage(1);
+
+  // Confetti agar koi entry hai
+  if (total > 0) {
+    setTimeout(() => confetti({
+      particleCount: 80, spread: 70, origin: { y: 0.3 },
+      colors: ['#F5C842','#7C5CFC','#22C55E','#B09FFF','#fff']
+    }), 600);
+  }
+}
+
+function renderPage(page) {
+  currentPage = page;
+  const start = (page - 1) * PER_PAGE;
+  const slice = sorted.slice(start, start + PER_PAGE);
+  const lb    = document.getElementById('lb');
+
   if (sorted.length === 0) {
-    container.innerHTML = '<div class="empty-row">No bids yet — be the first to claim #1 👑</div>';
+    lb.innerHTML = '<div class="empty-row">No bids yet — be the first to claim #1 👑</div>';
+    renderPagination(0);
     return;
   }
 
-  container.innerHTML = sorted.map((b, i) => `
-    <div class="row" style="--i:${i}">
-      <div class="rank">
-        ${i < 3
-          ? `<span class="rank-medal">${medals[i]}</span>`
-          : `<span class="rank-num">#${i + 1}</span>`
-        }
-      </div>
-      <div class="bidder-info">
-        <div class="bidder-name">${escHtml(b.name)}</div>
-        ${b.tag ? `<div class="bidder-tag">${escHtml(b.tag)}</div>` : ''}
-      </div>
-      <div class="bid-amount">
-        <div class="bid-usdt">$${b.bid}</div>
-        <div class="bid-label">USDT</div>
-      </div>
-    </div>
-  `).join('');
+  lb.innerHTML = slice.map((e, i) => {
+    const rank      = start + i;
+    const rankClass = rank === 0 ? 'rank1' : rank === 1 ? 'rank2' : rank === 2 ? 'rank3' : '';
+    const rankDisp  = rank < 3
+      ? `<span class="rank-medal">${MEDALS[rank]}</span>`
+      : `<span class="rank-num">#${rank + 1}</span>`;
+    return `
+      <div class="row ${rankClass}" style="animation-delay:${i * 0.04}s">
+        <div>${rankDisp}</div>
+        <div>
+          <div class="bidder-name">${esc(e.name)}</div>
+          ${e.tag ? `<div class="bidder-tag">${esc(e.tag)}</div>` : ''}
+        </div>
+        <div>
+          <div class="bid-usdt">$${e.amount}</div>
+          <div class="bid-label">USDT</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  renderPagination(sorted.length);
 }
 
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function renderPagination(total) {
+  const pages = Math.ceil(total / PER_PAGE);
+  const pg    = document.getElementById('pg');
+  if (pages <= 1) { pg.innerHTML = ''; return; }
+
+  let html = `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>← Prev</button>`;
+
+  let s = Math.max(1, currentPage - 2);
+  let e = Math.min(pages, s + 4);
+  s = Math.max(1, e - 4);
+
+  if (s > 1) html += `<button class="pg-btn" onclick="goPage(1)">1</button>${s > 2 ? '<span class="pg-info">…</span>' : ''}`;
+  for (let p = s; p <= e; p++)
+    html += `<button class="pg-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+  if (e < pages) html += `${e < pages-1 ? '<span class="pg-info">…</span>' : ''}<button class="pg-btn" onclick="goPage(${pages})">${pages}</button>`;
+
+  html += `<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>Next →</button>`;
+  html += `<span class="pg-info">${total} total</span>`;
+  pg.innerHTML = html;
 }
 
-function copyAddress() {
-  navigator.clipboard.writeText(WALLET_ADDRESS).then(() => {
-    const btn = document.querySelector('.copy-btn');
+function goPage(p) {
+  const pages = Math.ceil(sorted.length / PER_PAGE);
+  if (p < 1 || p > pages) return;
+  renderPage(p);
+  document.getElementById('lb').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function copyAddr() {
+  navigator.clipboard.writeText(WALLET).then(() => {
+    const btn = document.getElementById('copy-btn');
     btn.textContent = 'Copied!';
     btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = 'Copy';
-      btn.classList.remove('copied');
-    }, 2000);
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
   });
 }
 
-// Confetti on load if there are bidders
-function fireConfetti() {
-  if (LEADERBOARD_DATA.length > 0) {
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.3 },
-      colors: ['#F5C842', '#7C5CFC', '#22C55E', '#B09FFF', '#fff']
-    });
-  }
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-render();
-setTimeout(fireConfetti, 600);
-
-// Wallet address display
-document.getElementById('wallet-address').textContent = WALLET_ADDRESS;
+init();
 </script>
 </body>
 </html>
