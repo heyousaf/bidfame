@@ -4,133 +4,303 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BidFame — Live Leaderboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --gold:#F5C842;--gold-glow:#F5C84233;--silver:#B0B8C1;--bronze:#CD7F32;
-  --bg:#0A0A0F;--surface:#12121A;--surface2:#1A1A26;--border:#2A2A3A;
-  --text:#F0F0F8;--muted:#6B6B8A;--accent:#7C5CFC;--accent-glow:#7C5CFC22;--green:#22C55E;
+  --gold:#E8B84B;--gold2:#F5D080;--gold-bg:rgba(232,184,75,0.08);--gold-border:rgba(232,184,75,0.3);
+  --silver:#9BA8B5;--bronze:#B87333;
+  --bg:#07070F;--s1:#0E0E1A;--s2:#141420;--s3:#1C1C2C;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
+  --text:#F0EFF8;--muted:#6B6A84;--subtle:#9896B0;
+  --accent:#6C4FD4;--accent2:#9B7AFF;--accent-bg:rgba(108,79,212,0.12);
+  --green:#2ECC71;--red:#E74C3C;
+  --radius:14px;--radius-sm:8px;
 }
-body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(124,92,252,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,252,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
-.wrap{max-width:680px;margin:0 auto;padding:0 1rem 4rem;position:relative;z-index:1}
-.header{text-align:center;padding:3rem 0 2rem}
-.live-badge{display:inline-flex;align-items:center;gap:8px;background:var(--accent-glow);border:1px solid var(--accent);border-radius:100px;padding:6px 16px;font-size:12px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.5rem}
-.live-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:pdot 2s ease-in-out infinite}
-@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
-.site-title{font-size:clamp(2.5rem,8vw,4rem);font-weight:700;letter-spacing:-.03em;line-height:1;margin-bottom:.5rem;background:linear-gradient(135deg,#fff 0%,#B09FFF 60%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.site-tagline{font-size:1rem;color:var(--muted);margin-bottom:2rem}
-.stats-bar{display:flex;justify-content:center;gap:2rem;margin-bottom:2rem;padding:1rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:12px}
-.stat{text-align:center}
-.stat-value{font-family:'Space Mono',monospace;font-size:1.25rem;font-weight:700;color:var(--text)}
-.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
-.hint-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:2rem;display:flex;gap:1rem;align-items:flex-start}
-.hint-box p{font-size:14px;color:var(--muted);line-height:1.6}
-.hint-box p strong{color:var(--text)}
-.top-banner{background:linear-gradient(135deg,var(--gold-glow),transparent);border:1px solid var(--gold);border-radius:16px;padding:1.5rem;margin-bottom:2rem;text-align:center;position:relative;overflow:hidden}
-.top-banner::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent 0deg,rgba(245,200,66,.05) 60deg,transparent 120deg);animation:rglow 8s linear infinite}
-@keyframes rglow{to{transform:rotate(360deg)}}
-.tb-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:.5rem;position:relative}
-.tb-amount{font-family:'Space Mono',monospace;font-size:2.5rem;font-weight:700;color:var(--gold);position:relative}
-.tb-name{font-size:1rem;color:var(--muted);margin-top:.25rem;position:relative}
-.beat-btn{display:inline-block;margin-top:1rem;background:var(--gold);color:#0A0A0F;font-weight:700;font-size:14px;padding:10px 24px;border-radius:100px;text-decoration:none;position:relative;transition:transform .2s,box-shadow .2s}
-.beat-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--gold-glow)}
-.sec-title{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
-.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
-.leaderboard{display:flex;flex-direction:column;gap:8px;margin-bottom:1.5rem;min-height:80px}
-.row{display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:12px;padding:1rem 1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;animation:slin .35s ease both}
-@keyframes slin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.row.rank1{border-color:var(--gold);background:linear-gradient(135deg,rgba(245,200,66,.06),var(--surface))}
-.row.rank2{border-color:var(--silver);background:linear-gradient(135deg,rgba(176,184,193,.06),var(--surface))}
-.row.rank3{border-color:var(--bronze);background:linear-gradient(135deg,rgba(205,127,50,.06),var(--surface))}
-.rank-medal{font-size:1.5rem;display:block;text-align:center}
-.rank-num{font-family:'Space Mono',monospace;font-size:14px;color:var(--muted);font-weight:700;text-align:center}
-.bidder-name{font-weight:600;font-size:15px;color:var(--text)}
-.bidder-tag{font-size:12px;color:var(--muted);margin-top:2px}
-.bid-usdt{font-family:'Space Mono',monospace;font-weight:700;font-size:15px;text-align:right}
-.row.rank1 .bid-usdt{color:var(--gold)}
-.row.rank2 .bid-usdt{color:var(--silver)}
-.row.rank3 .bid-usdt{color:var(--bronze)}
-.row:not(.rank1):not(.rank2):not(.rank3) .bid-usdt{color:var(--accent)}
-.bid-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;text-align:right}
-.empty-row{padding:2rem;text-align:center;color:var(--muted);font-size:14px;border:1px dashed var(--border);border-radius:12px}
-.pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:2rem;flex-wrap:wrap}
-.pg-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;font-family:'Space Grotesk',sans-serif;padding:8px 14px;cursor:pointer;transition:all .2s}
-.pg-btn:hover:not(:disabled){color:var(--text);border-color:var(--accent)}
-.pg-btn.active{background:var(--accent-glow);border-color:var(--accent);color:var(--accent);font-weight:600}
-.pg-btn:disabled{opacity:.3;cursor:not-allowed}
-.pg-info{font-size:13px;color:var(--muted);font-family:'Space Mono',monospace;padding:0 4px}
-.bid-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:2rem}
-.bid-steps{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem}
-.bid-step{display:flex;gap:12px;align-items:flex-start}
-.step-num{width:28px;height:28px;border-radius:50%;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Space Mono',monospace}
-.step-text{font-size:14px;color:var(--muted);line-height:1.5;padding-top:4px}
-.step-text strong{color:var(--text)}
-.step-text a{color:var(--accent)}
-.net-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:100px;padding:4px 12px;font-size:12px;color:var(--green);font-family:'Space Mono',monospace;margin-bottom:1rem}
-.net-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green)}
-.addr-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:1rem}
-.addr-text{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);word-break:break-all;flex:1}
-.copy-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:12px;padding:4px 10px;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:all .2s;white-space:nowrap}
-.copy-btn:hover{color:var(--text);border-color:var(--accent)}
-.copy-btn.copied{color:var(--green);border-color:var(--green)}
-.rules-note{font-size:12px;color:var(--muted);line-height:1.6;padding-top:1rem;border-top:1px solid var(--border)}
-.footer{text-align:center;font-size:12px;color:var(--muted);padding-top:1rem;border-top:1px solid var(--border)}
-.footer a{color:var(--accent);text-decoration:none}
-@media(max-width:480px){.stats-bar{gap:1rem}.tb-amount{font-size:2rem}.addr-text{font-size:9px}}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* noise texture overlay */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:999;opacity:.4}
+
+/* animated bg orbs */
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
+.orb1{width:600px;height:600px;background:radial-gradient(circle,rgba(108,79,212,0.15),transparent 70%);top:-200px;right:-200px;animation:float1 20s ease-in-out infinite}
+.orb2{width:400px;height:400px;background:radial-gradient(circle,rgba(232,184,75,0.08),transparent 70%);bottom:-100px;left:-100px;animation:float2 25s ease-in-out infinite}
+.orb3{width:300px;height:300px;background:radial-gradient(circle,rgba(46,204,113,0.06),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:float3 18s ease-in-out infinite}
+@keyframes float1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-40px,30px) scale(1.1)}66%{transform:translate(20px,-20px) scale(0.95)}}
+@keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-40px)}}
+@keyframes float3{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.2)}}
+
+.wrap{max-width:720px;margin:0 auto;padding:0 1.25rem 5rem;position:relative;z-index:1}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:5rem 0 3rem;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border2);border-radius:100px;padding:7px 18px;font-size:11px;font-family:'Space Mono',monospace;color:var(--subtle);letter-spacing:.15em;text-transform:uppercase;margin-bottom:2rem}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(46,204,113,.4);animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(46,204,113,.4)}70%{box-shadow:0 0 0 8px rgba(46,204,113,0)}100%{box-shadow:0 0 0 0 rgba(46,204,113,0)}}
+.hero-title{font-size:clamp(3rem,10vw,5.5rem);font-weight:700;letter-spacing:-.04em;line-height:.95;margin-bottom:1rem;background:linear-gradient(135deg,#fff 20%,#C4B5FD 55%,var(--accent2) 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:titleIn .8s cubic-bezier(.16,1,.3,1) both}
+@keyframes titleIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.hero-sub{font-size:1.05rem;color:var(--muted);font-weight:300;letter-spacing:.01em;animation:titleIn .8s .15s cubic-bezier(.16,1,.3,1) both}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:var(--radius);overflow:hidden;margin:2.5rem 0;animation:titleIn .6s .3s both}
+.stat-cell{background:var(--s1);padding:1.25rem 1rem;text-align:center}
+.stat-val{font-family:'Space Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--text);display:block;margin-bottom:4px}
+.stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+
+/* ── HINT ── */
+.hint{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.4rem;margin-bottom:2rem;display:flex;gap:14px;align-items:flex-start;animation:titleIn .6s .4s both}
+.hint-icon{width:34px;height:34px;border-radius:8px;background:var(--accent-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hint-icon svg{width:16px;height:16px;stroke:var(--accent2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hint p{font-size:13.5px;color:var(--subtle);line-height:1.65}
+.hint p strong{color:var(--text);font-weight:600}
+
+/* ── CHAMPION CARD ── */
+.champion-wrap{margin-bottom:2.5rem;animation:titleIn .7s .2s both}
+.champion-card{position:relative;border-radius:20px;overflow:hidden;background:linear-gradient(135deg,rgba(232,184,75,0.12),rgba(232,184,75,0.04));border:1px solid var(--gold-border);padding:0}
+.champion-bg{position:absolute;inset:0;background:url('https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop&h=400') center/cover no-repeat;opacity:.04}
+.champion-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;align-items:center;gap:1.5rem;padding:2rem 2rem}
+.champion-left{}
+.champion-crown{font-size:10px;text-transform:uppercase;letter-spacing:.18em;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+.crown-line{height:1px;width:32px;background:linear-gradient(90deg,var(--gold),transparent)}
+.champion-name{font-size:2rem;font-weight:700;letter-spacing:-.03em;color:var(--text);margin-bottom:.3rem;line-height:1.1}
+.champion-tag{font-size:13px;color:var(--muted);margin-bottom:1rem}
+.champion-tag a{color:var(--accent2);text-decoration:none}
+.champion-tag a:hover{text-decoration:underline}
+.champion-website{display:inline-flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--subtle);text-decoration:none;transition:all .2s}
+.champion-website:hover{border-color:var(--accent2);color:var(--accent2)}
+.champion-website svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.champion-right{text-align:right}
+.champion-amount{font-family:'Space Mono',monospace;font-size:3rem;font-weight:700;color:var(--gold);line-height:1;display:block;text-shadow:0 0 40px rgba(232,184,75,.3)}
+.champion-unit{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);opacity:.7;display:block;margin-top:4px}
+.beat-btn{display:inline-flex;align-items:center;gap:8px;margin-top:1.25rem;background:var(--gold);color:#0A0806;font-weight:700;font-size:13px;padding:11px 22px;border-radius:100px;text-decoration:none;transition:all .2s;white-space:nowrap}
+.beat-btn:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 12px 32px rgba(232,184,75,.25)}
+.beat-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* shimmer on champion card */
+.champion-card::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.04),transparent);animation:shimmer 4s ease-in-out infinite;z-index:2;pointer-events:none}
+@keyframes shimmer{0%{left:-100%}50%{left:150%}100%{left:150%}}
+
+/* ── SECTION HEADER ── */
+.sec-hd{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
+.sec-hd-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);font-family:'Space Mono',monospace;white-space:nowrap}
+.sec-hd-line{flex:1;height:1px;background:var(--border)}
+
+/* ── LEADERBOARD ── */
+.lb-list{display:flex;flex-direction:column;gap:6px;margin-bottom:1.25rem}
+.lb-row{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:14px;padding:.95rem 1.25rem;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);transition:border-color .2s,background .2s;animation:rowIn .4s ease both}
+.lb-row:hover{border-color:var(--border2);background:var(--s2)}
+@keyframes rowIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.lb-row.s1{border-color:rgba(232,184,75,.25);background:linear-gradient(135deg,rgba(232,184,75,.05),var(--s1))}
+.lb-row.s2{border-color:rgba(155,168,181,.2);background:linear-gradient(135deg,rgba(155,168,181,.04),var(--s1))}
+.lb-row.s3{border-color:rgba(184,115,51,.2);background:linear-gradient(135deg,rgba(184,115,51,.04),var(--s1))}
+.lb-rank{text-align:center}
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
+.lb-row.s1 .rank-badge{background:rgba(232,184,75,.15);color:var(--gold)}
+.lb-row.s2 .rank-badge{background:rgba(155,168,181,.12);color:var(--silver)}
+.lb-row.s3 .rank-badge{background:rgba(184,115,51,.12);color:var(--bronze)}
+.lb-row:not(.s1):not(.s2):not(.s3) .rank-badge{background:var(--s3);color:var(--muted)}
+.lb-name{font-weight:600;font-size:14.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-meta{display:flex;align-items:center;gap:8px;margin-top:3px}
+.lb-tag{font-size:11.5px;color:var(--muted)}
+.lb-site{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--accent2);text-decoration:none;border:1px solid rgba(108,79,212,.3);border-radius:5px;padding:2px 7px;transition:all .15s}
+.lb-site:hover{background:var(--accent-bg)}
+.lb-site svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lb-amount-wrap{text-align:right}
+.lb-amount{font-family:'Space Mono',monospace;font-weight:700;font-size:15px}
+.lb-row.s1 .lb-amount{color:var(--gold)}
+.lb-row.s2 .lb-amount{color:var(--silver)}
+.lb-row.s3 .lb-amount{color:var(--bronze)}
+.lb-row:not(.s1):not(.s2):not(.s3) .lb-amount{color:var(--accent2)}
+.lb-unit{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.empty-state{padding:3rem 2rem;text-align:center;border:1px dashed var(--border2);border-radius:var(--radius);color:var(--muted);font-size:14px;line-height:1.7}
+.empty-state strong{display:block;font-size:1rem;color:var(--subtle);margin-bottom:.5rem}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:2.5rem;flex-wrap:wrap}
+.pg-btn{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-size:13px;font-family:'Inter',sans-serif;padding:8px 14px;cursor:pointer;transition:all .2s}
+.pg-btn:hover:not(:disabled){color:var(--text);border-color:var(--border2)}
+.pg-btn.active{background:var(--accent-bg);border-color:rgba(108,79,212,.5);color:var(--accent2);font-weight:600}
+.pg-btn:disabled{opacity:.25;cursor:not-allowed}
+.pg-dots{font-size:13px;color:var(--muted);padding:0 2px}
+.pg-count{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;padding:0 6px}
+
+/* ── HOW TO BID ── */
+.bid-section{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:2rem;margin-bottom:2rem;animation:titleIn .6s .5s both}
+.bid-steps{display:flex;flex-direction:column;gap:1.25rem;margin-bottom:1.75rem}
+.bid-step{display:grid;grid-template-columns:36px 1fr;gap:14px;align-items:flex-start}
+.step-num{width:36px;height:36px;border-radius:10px;background:var(--accent-bg);border:1px solid rgba(108,79,212,.25);color:var(--accent2);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;flex-shrink:0}
+.step-body{padding-top:8px}
+.step-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.step-desc a{color:var(--accent2)}
+.net-pill{display:inline-flex;align-items:center;gap:7px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:100px;padding:5px 14px;font-size:12px;color:var(--green);font-family:'Space Mono',monospace;margin-bottom:1rem}
+.net-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.addr-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.9rem 1rem;display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+.addr-text{font-family:'Space Mono',monospace;font-size:11px;color:var(--subtle);word-break:break-all;flex:1;line-height:1.5}
+.copy-btn{background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:12px;padding:6px 12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;white-space:nowrap;font-weight:500}
+.copy-btn:hover{color:var(--text);border-color:var(--border2)}
+.copy-btn.ok{color:var(--green);border-color:rgba(46,204,113,.4)}
+.divider{height:1px;background:var(--border);margin:1.25rem 0}
+.rules{font-size:12px;color:var(--muted);line-height:1.7}
+.rules strong{color:var(--subtle)}
+
+/* ── FOOTER ── */
+.footer{text-align:center;padding-top:1.5rem;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+.footer a{color:var(--accent2);text-decoration:none}
+
+/* ── COUNTDOWN (for when needed) ── */
+.countdown-wrap{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:2rem;text-align:center;display:none}
+.cd-label{font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);margin-bottom:.75rem}
+.cd-timer{display:flex;align-items:center;justify-content:center;gap:.5rem}
+.cd-unit{text-align:center}
+.cd-val{font-family:'Space Mono',monospace;font-size:2rem;font-weight:700;color:var(--text);display:block;line-height:1}
+.cd-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:block;margin-top:3px}
+.cd-sep{font-size:1.5rem;color:var(--border2);font-weight:300;padding-bottom:12px}
+
+/* ── ACTIVITY TICKER ── */
+.ticker-wrap{overflow:hidden;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:2rem;padding:10px 0}
+.ticker-inner{display:flex;gap:2.5rem;white-space:nowrap;animation:ticker 20s linear infinite}
+.ticker-inner:hover{animation-play-state:paused}
+.ticker-item{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;display:inline-flex;align-items:center;gap:8px}
+.ticker-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── PARTICLE CANVAS ── */
+#particle-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.4}
+
+@media(max-width:540px){
+  .champion-inner{grid-template-columns:1fr;gap:1rem}
+  .champion-right{text-align:left;display:flex;align-items:center;gap:1.5rem}
+  .champion-amount{font-size:2.25rem}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .stat-val{font-size:1.1rem}
+  .hero-title{letter-spacing:-.03em}
+}
 </style>
 </head>
 <body>
+
+<canvas id="particle-canvas"></canvas>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
 <div class="wrap">
 
-  <div class="header">
-    <div class="live-badge">Live Leaderboard</div>
-    <h1 class="site-title">BidFame</h1>
-    <p class="site-tagline">Bid more. Rank higher. Get famous.</p>
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow"><span class="pulse-dot"></span>Live Bidding — Open 24/7</div>
+    <h1 class="hero-title">BidFame</h1>
+    <p class="hero-sub">Outbid everyone. Claim the top spot. Get featured.</p>
   </div>
 
-  <div class="stats-bar">
-    <div class="stat"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Bidders</div></div>
-    <div class="stat"><div class="stat-value" id="stat-top">$0</div><div class="stat-label">Top Bid</div></div>
-    <div class="stat"><div class="stat-value" id="stat-next">$1</div><div class="stat-label">Min to #1</div></div>
+  <!-- Stats -->
+  <div class="stats" id="stats-bar">
+    <div class="stat-cell"><span class="stat-val" id="s-total">0</span><span class="stat-lbl">Total Bidders</span></div>
+    <div class="stat-cell"><span class="stat-val" id="s-top">$0</span><span class="stat-lbl">Highest Bid</span></div>
+    <div class="stat-cell"><span class="stat-val" id="s-next">$1</span><span class="stat-lbl">Bid to Lead</span></div>
   </div>
 
-  <div class="hint-box">
-    <div style="font-size:1.5rem;flex-shrink:0;margin-top:2px">💡</div>
-    <p><strong>Bid $1 more than the current leader</strong> to claim the #1 spot. Your name/brand gets featured on the leaderboard, website, and Instagram story daily — until someone outbids you.</p>
+  <!-- Hint -->
+  <div class="hint">
+    <div class="hint-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+    <p><strong>Bid $1 more than the current leader</strong> to claim the #1 position. Your brand is featured on the website and promoted daily on Instagram — until someone outbids you.</p>
   </div>
 
-  <div id="top-banner" class="top-banner" style="display:none">
-    <div class="tb-label">👑 Current Leader</div>
-    <div class="tb-amount" id="tb-amount">—</div>
-    <div class="tb-name" id="tb-name">—</div>
-    <a href="#how-to-bid" class="beat-btn">Beat this bid ↗</a>
+  <!-- Activity Ticker -->
+  <div class="ticker-wrap" id="ticker-wrap" style="display:none">
+    <div class="ticker-inner" id="ticker-inner"></div>
   </div>
 
-  <div class="sec-title">Live Rankings</div>
-  <div class="leaderboard" id="lb"><div class="empty-row">No bids yet — be the first to claim #1 👑</div></div>
+  <!-- Champion Card -->
+  <div class="champion-wrap" id="champion-wrap" style="display:none">
+    <div class="champion-card">
+      <div class="champion-bg"></div>
+      <div class="champion-inner">
+        <div class="champion-left">
+          <div class="champion-crown"><div class="crown-line"></div>Current Leader<div class="crown-line"></div></div>
+          <div class="champion-name" id="c-name">—</div>
+          <div class="champion-tag" id="c-tag"></div>
+          <a id="c-website" href="#" class="champion-website" style="display:none" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Visit Website
+          </a>
+          <a href="#how-to-bid" class="beat-btn">
+            Outbid Now
+            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <div class="champion-right">
+          <span class="champion-amount" id="c-amount">$0</span>
+          <span class="champion-unit">USDT</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No bids state -->
+  <div id="no-bids" class="empty-state" style="display:none;margin-bottom:2rem">
+    <strong>No bids placed yet</strong>
+    Send $1 USDT to claim the #1 spot and get featured instantly.
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="sec-hd"><span class="sec-hd-label">Live Rankings</span><div class="sec-hd-line"></div></div>
+  <div class="lb-list" id="lb"></div>
   <div class="pagination" id="pg"></div>
 
-  <div id="how-to-bid" class="bid-box">
-    <div class="sec-title" style="margin-bottom:1.25rem">How to bid</div>
+  <!-- How to Bid -->
+  <div id="how-to-bid" class="bid-section">
+    <div class="sec-hd" style="margin-bottom:1.5rem"><span class="sec-hd-label">How to bid</span><div class="sec-hd-line"></div></div>
     <div class="bid-steps">
-      <div class="bid-step"><div class="step-num">1</div><div class="step-text">Check the <strong>current top bid</strong> above. Send <strong>$1 more</strong> than that amount.</div></div>
-      <div class="bid-step"><div class="step-num">2</div><div class="step-text">Send <strong>USDT (TRC-20)</strong> to the address below. Put your <strong>name or brand</strong> in the memo.</div></div>
-      <div class="bid-step"><div class="step-num">3</div><div class="step-text">DM the <strong>TXID</strong> to <a href="https://instagram.com/bidfame">@bidfame</a> on Instagram for manual verification.</div></div>
-      <div class="bid-step"><div class="step-num">4</div><div class="step-text">Once verified you're <strong>live on the leaderboard</strong> and featured on Instagram story!</div></div>
+      <div class="bid-step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <div class="step-title">Check the current top bid</div>
+          <div class="step-desc">Your bid must be exactly <strong>$1 more</strong> than the current highest amount shown above.</div>
+        </div>
+      </div>
+      <div class="bid-step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <div class="step-title">Send USDT via TRC-20</div>
+          <div class="step-desc">Transfer your bid amount to the wallet address below. Include your <strong>name or brand</strong> in the memo/note field.</div>
+        </div>
+      </div>
+      <div class="bid-step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <div class="step-title">Submit your TXID</div>
+          <div class="step-desc">DM the transaction ID to <a href="https://instagram.com/bidfame" target="_blank">@bidfame</a> on Instagram. Include your name, tag, and website link if you have one.</div>
+        </div>
+      </div>
+      <div class="bid-step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <div class="step-title">Go live on the leaderboard</div>
+          <div class="step-desc">Once verified (within 24 hours), your entry appears on the leaderboard and Instagram promotion begins.</div>
+        </div>
+      </div>
     </div>
-    <div class="net-badge">USDT · TRC-20 Network</div>
-    <div class="addr-box">
+
+    <div class="net-pill">USDT &mdash; TRC-20 Network Only</div>
+    <div class="addr-wrap">
       <span class="addr-text" id="wallet-addr">YOUR_USDT_TRC20_ADDRESS_HERE</span>
       <button class="copy-btn" id="copy-btn" onclick="copyAddr()">Copy</button>
     </div>
-    <div class="rules-note">⚡ Bids verified manually within 24 hours. No fixed end date — bidding runs indefinitely. #1 bidder gets daily Instagram story feature until outbid. Payments non-refundable. Starting bid: <strong>$1 USDT</strong>.</div>
+    <div class="divider"></div>
+    <div class="rules">
+      Bids are verified manually within 24 hours. Bidding runs indefinitely with no end date.
+      The #1 ranked bidder receives daily Instagram story promotion and leaderboard placement until outbid.
+      All payments are <strong>non-refundable</strong>. Minimum first bid: <strong>$1 USDT</strong>.
+    </div>
   </div>
 
   <div class="footer">
-    <p>BidFame &mdash; <a href="https://instagram.com/bidfame">@bidfame</a> on Instagram</p>
-    <p style="margin-top:6px">Leaderboard updates within 24hrs of payment verification.</p>
+    <p>BidFame &mdash; <a href="https://instagram.com/bidfame" target="_blank">@bidfame</a></p>
+    <p style="margin-top:6px;font-size:11px">Leaderboard updated within 24 hours of payment verification</p>
   </div>
 
 </div>
@@ -138,136 +308,196 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.2/confetti.browser.min.js"></script>
 <script>
 
-// ============================================================
-//  EDIT KARO — APNA WALLET ADDRESS YAHAN LIKHO
-// ============================================================
+// ================================================================
+//  CONFIG — YAHAN EDIT KARO
+// ================================================================
 const WALLET = "YOUR_USDT_TRC20_ADDRESS_HERE";
 
-// ============================================================
-//  EDIT KARO — NAI ENTRY ADD KARO YA PURANI HATAO
-//  Jis ka bhi amount zyada hoga wo automatically #1 pe aayega
-//  Format: { name, tag, amount }
-//  tag optional hai — delete kar sakte ho agar chahein
-// ============================================================
+// NAI ENTRY ADD KARO — bas neeche list mein likho
+// Jis ka amount zyada hoga wo automatically #1 pe aayega
+// website field optional hai — delete kar sakte ho agar nahi hai
 const ENTRIES = [
-  // EXAMPLE DATA — in sab ko apni real entries se replace karo
-  { name: "Bid Fame",  tag: "@Bidfame",  amount: 0 },
+  { name: "Bid Fame",   tag: "@Bidfame",   amount: 0, website: "https://bidfame.vercel.app/" },
 ];
-// ============================================================
+// ================================================================
 
 const PER_PAGE = 10;
-const MEDALS   = ['🥇','🥈','🥉'];
-let currentPage = 1;
+let page = 1;
+const sorted = [...ENTRIES].sort((a,b) => b.amount - a.amount);
 
-// Sort karo — highest amount hamesha upar
-const sorted = [...ENTRIES].sort((a, b) => b.amount - a.amount);
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 
-function init() {
-  // Wallet address set karo
+function init(){
   document.getElementById('wallet-addr').textContent = WALLET;
-
   const total  = sorted.length;
   const topBid = total ? sorted[0].amount : 0;
 
-  // Stats update karo
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-top').textContent   = '$' + topBid;
-  document.getElementById('stat-next').textContent  = '$' + (topBid + 1);
+  // Stats
+  animCount('s-total', total);
+  animCount('s-top',   topBid,  '$', '');
+  animCount('s-next',  topBid+1,'$', '');
 
-  // Top banner
-  if (total > 0) {
-    document.getElementById('top-banner').style.display = 'block';
-    document.getElementById('tb-amount').textContent = '$' + sorted[0].amount + ' USDT';
-    document.getElementById('tb-name').textContent   =
-      sorted[0].name + (sorted[0].tag ? ' · ' + sorted[0].tag : '');
+  // Champion card
+  if(total > 0){
+    const top = sorted[0];
+    document.getElementById('champion-wrap').style.display = 'block';
+    document.getElementById('c-name').textContent = top.name;
+    document.getElementById('c-tag').textContent  = top.tag || '';
+    document.getElementById('c-amount').textContent = '$' + top.amount;
+    if(top.website){
+      const ws = document.getElementById('c-website');
+      ws.href = top.website;
+      ws.style.display = 'inline-flex';
+    }
+    document.getElementById('no-bids').style.display = 'none';
+  } else {
+    document.getElementById('no-bids').style.display = 'block';
   }
+
+  // Ticker
+  buildTicker();
 
   renderPage(1);
 
-  // Confetti agar koi entry hai
-  if (total > 0) {
-    setTimeout(() => confetti({
-      particleCount: 80, spread: 70, origin: { y: 0.3 },
-      colors: ['#F5C842','#7C5CFC','#22C55E','#B09FFF','#fff']
-    }), 600);
+  // Confetti
+  if(total > 0){
+    setTimeout(()=> confetti({
+      particleCount:100, spread:80, origin:{y:.3},
+      colors:['#E8B84B','#6C4FD4','#2ECC71','#C4B5FD','#fff'],
+      scalar:1.1
+    }), 700);
   }
 }
 
-function renderPage(page) {
-  currentPage = page;
-  const start = (page - 1) * PER_PAGE;
-  const slice = sorted.slice(start, start + PER_PAGE);
-  const lb    = document.getElementById('lb');
+function animCount(id, target, prefix='', suffix=''){
+  const el = document.getElementById(id);
+  let start = 0;
+  const dur = 1200;
+  const t0 = performance.now();
+  function step(t){
+    const progress = Math.min((t - t0) / dur, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const val = Math.round(start + (target - start) * ease);
+    el.textContent = prefix + val + suffix;
+    if(progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
 
-  if (sorted.length === 0) {
-    lb.innerHTML = '<div class="empty-row">No bids yet — be the first to claim #1 👑</div>';
-    renderPagination(0);
+function buildTicker(){
+  if(sorted.length === 0) return;
+  const tw = document.getElementById('ticker-wrap');
+  const ti = document.getElementById('ticker-inner');
+  tw.style.display = 'block';
+  // Duplicate for seamless loop
+  const items = [...sorted, ...sorted].map(e =>
+    `<span class="ticker-item"><span class="ticker-dot"></span>${esc(e.name)} &mdash; $${e.amount} USDT</span>`
+  ).join('');
+  ti.innerHTML = items;
+}
+
+function renderPage(p){
+  page = p;
+  const start = (p-1)*PER_PAGE;
+  const slice = sorted.slice(start, start+PER_PAGE);
+  const lb = document.getElementById('lb');
+
+  if(sorted.length === 0){
+    lb.innerHTML = '<div class="empty-state"><strong>No bids yet</strong>Be the first to claim the #1 position.</div>';
+    document.getElementById('pg').innerHTML = '';
     return;
   }
 
-  lb.innerHTML = slice.map((e, i) => {
-    const rank      = start + i;
-    const rankClass = rank === 0 ? 'rank1' : rank === 1 ? 'rank2' : rank === 2 ? 'rank3' : '';
-    const rankDisp  = rank < 3
-      ? `<span class="rank-medal">${MEDALS[rank]}</span>`
-      : `<span class="rank-num">#${rank + 1}</span>`;
+  lb.innerHTML = slice.map((e,i)=>{
+    const rank = start + i;
+    const cls  = rank===0?'s1':rank===1?'s2':rank===2?'s3':'';
+    const rl   = rank===0?'01':rank===1?'02':rank===2?'03':'#'+(rank+1);
+    const websiteBtn = e.website
+      ? `<a class="lb-site" href="${esc(e.website)}" target="_blank" rel="noopener">
+           <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Website</a>`
+      : '';
     return `
-      <div class="row ${rankClass}" style="animation-delay:${i * 0.04}s">
-        <div>${rankDisp}</div>
+      <div class="lb-row ${cls}" style="animation-delay:${i*.05}s">
+        <div class="lb-rank"><span class="rank-badge">${rl}</span></div>
         <div>
-          <div class="bidder-name">${esc(e.name)}</div>
-          ${e.tag ? `<div class="bidder-tag">${esc(e.tag)}</div>` : ''}
+          <div class="lb-name">${esc(e.name)}</div>
+          <div class="lb-meta">
+            ${e.tag ? `<span class="lb-tag">${esc(e.tag)}</span>` : ''}
+            ${websiteBtn}
+          </div>
         </div>
-        <div>
-          <div class="bid-usdt">$${e.amount}</div>
-          <div class="bid-label">USDT</div>
+        <div class="lb-amount-wrap">
+          <div class="lb-amount">$${e.amount}</div>
+          <div class="lb-unit">USDT</div>
         </div>
       </div>`;
   }).join('');
 
-  renderPagination(sorted.length);
+  buildPagination(sorted.length);
 }
 
-function renderPagination(total) {
+function buildPagination(total){
   const pages = Math.ceil(total / PER_PAGE);
-  const pg    = document.getElementById('pg');
-  if (pages <= 1) { pg.innerHTML = ''; return; }
+  const pg = document.getElementById('pg');
+  if(pages <= 1){ pg.innerHTML=''; return; }
 
-  let html = `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>← Prev</button>`;
-
-  let s = Math.max(1, currentPage - 2);
-  let e = Math.min(pages, s + 4);
-  s = Math.max(1, e - 4);
-
-  if (s > 1) html += `<button class="pg-btn" onclick="goPage(1)">1</button>${s > 2 ? '<span class="pg-info">…</span>' : ''}`;
-  for (let p = s; p <= e; p++)
-    html += `<button class="pg-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
-  if (e < pages) html += `${e < pages-1 ? '<span class="pg-info">…</span>' : ''}<button class="pg-btn" onclick="goPage(${pages})">${pages}</button>`;
-
-  html += `<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>Next →</button>`;
-  html += `<span class="pg-info">${total} total</span>`;
-  pg.innerHTML = html;
+  let h = `<button class="pg-btn" onclick="goPage(${page-1})" ${page===1?'disabled':''}>Prev</button>`;
+  let s = Math.max(1, page-2), e = Math.min(pages, s+4);
+  s = Math.max(1, e-4);
+  if(s > 1) h += `<button class="pg-btn" onclick="goPage(1)">1</button>${s>2?'<span class="pg-dots">…</span>':''}`;
+  for(let p=s;p<=e;p++) h += `<button class="pg-btn ${p===page?'active':''}" onclick="goPage(${p})">${p}</button>`;
+  if(e < pages) h += `${e<pages-1?'<span class="pg-dots">…</span>':''}<button class="pg-btn" onclick="goPage(${pages})">${pages}</button>`;
+  h += `<button class="pg-btn" onclick="goPage(${page+1})" ${page===pages?'disabled':''}>Next</button>`;
+  h += `<span class="pg-count">${total} entries</span>`;
+  pg.innerHTML = h;
 }
 
-function goPage(p) {
+function goPage(p){
   const pages = Math.ceil(sorted.length / PER_PAGE);
-  if (p < 1 || p > pages) return;
+  if(p<1||p>pages) return;
   renderPage(p);
-  document.getElementById('lb').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('lb').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-function copyAddr() {
-  navigator.clipboard.writeText(WALLET).then(() => {
-    const btn = document.getElementById('copy-btn');
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+function copyAddr(){
+  navigator.clipboard.writeText(WALLET).then(()=>{
+    const b = document.getElementById('copy-btn');
+    b.textContent='Copied'; b.classList.add('ok');
+    setTimeout(()=>{ b.textContent='Copy'; b.classList.remove('ok'); },2000);
   });
 }
 
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+// ── Particle system ──
+(function(){
+  const c = document.getElementById('particle-canvas');
+  const ctx = c.getContext('2d');
+  let W,H,particles=[];
+  function resize(){ W=c.width=window.innerWidth; H=c.height=window.innerHeight }
+  resize();
+  window.addEventListener('resize',resize);
+  const colors=['rgba(108,79,212,','rgba(232,184,75,','rgba(46,204,113,'];
+  for(let i=0;i<60;i++) particles.push({
+    x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight,
+    r:Math.random()*1.5+.5,
+    vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3,
+    c:colors[Math.floor(Math.random()*colors.length)],
+    a:Math.random()*.5+.1
+  });
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=p.c+p.a+')';
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
 
 init();
 </script>
