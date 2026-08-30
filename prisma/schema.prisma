@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  telegramId String  @unique
+  username  String?
+  firstName String?
+  lastName  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings  Listing[]
+  bids      Bid[]
+  payments  Payment[]
+}
+
+model Listing {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  name        String
+  instagram   String
+  website     String?
+  description String
+
+  imageUrl    String?
+
+  currentBid  Int      @default(0)
+  bidCount    Int      @default(0)
+
+  active      Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bids        Bid[]
+  payments    Payment[]
+
+  @@index([currentBid])
+  @@index([userId])
+}
+
+enum BidStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REJECTED
+}
+
+model Bid {
+  id                 String    @id @default(cuid())
+  listingId          String
+  listing            Listing   @relation(fields: [listingId], references: [id])
+  userId             String
+  user               User      @relation(fields: [userId], references: [id])
+
+  amountStars        Int
+  previousBid        Int
+
+  telegramPaymentId  String?   @unique
+  telegramChargeId   String?   @unique
+
+  status             BidStatus @default(PENDING)
+
+  createdAt          DateTime  @default(now())
+
+  payment            Payment?
+
+  @@index([listingId])
+  @@index([userId])
+  @@index([status])
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model Payment {
+  id                 String        @id @default(cuid())
+  userId             String
+  user               User          @relation(fields: [userId], references: [id])
+  listingId          String
+  listing            Listing       @relation(fields: [listingId], references: [id])
+  bidId              String?       @unique
+  bid                Bid?          @relation(fields: [bidId], references: [id])
+
+  amountStars        Int
+  currency           String        @default("XTR")
+
+  telegramPaymentId  String        @unique
+  telegramChargeId   String?       @unique
+
+  invoicePayload     String        @unique
+
+  status             PaymentStatus @default(PENDING)
+
+  createdAt          DateTime      @default(now())
+
+  @@index([userId])
+  @@index([listingId])
+}
