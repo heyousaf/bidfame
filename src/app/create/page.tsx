@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { getInitData, getTelegramWebApp } from "@/lib/telegramClient";
 
 export default function CreateListingPage() {
@@ -14,6 +15,21 @@ export default function CreateListingPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const tg = getTelegramWebApp();
+    tg?.ready();
+
+    // Show Telegram's native back button (top-left chevron) while this page is open.
+    tg?.BackButton?.show();
+    const handleBack = () => router.push("/");
+    tg?.BackButton?.onClick(handleBack);
+
+    return () => {
+      tg?.BackButton?.offClick(handleBack);
+      tg?.BackButton?.hide();
+    };
+  }, []);
 
   function handleFile(f: File | null) {
     setFile(f);
@@ -57,6 +73,13 @@ export default function CreateListingPage() {
 
   return (
     <main className="max-w-[480px] mx-auto px-4 pt-7 pb-16">
+      <Link
+        href="/"
+        className="inline-flex items-center gap-1 text-sm font-semibold text-black/50 mb-4"
+      >
+        ← Back
+      </Link>
+
       <h1 className="font-display text-2xl font-extrabold mb-1">🚀 Join BidFame</h1>
       <p className="text-sm text-black/50 mb-6">Create your listing to start competing for #1.</p>
 
