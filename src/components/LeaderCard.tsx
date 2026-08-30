@@ -37,7 +37,7 @@ export default function LeaderCard({ listing }: { listing: Listing }) {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  window.open(listing.instagram, "_blank", "noopener,noreferrer");
+                  window.open(listing.instagram as string, "_blank", "noopener,noreferrer");
                 }}
                 className="text-golddeep font-semibold underline-offset-2 hover:underline"
               >
@@ -49,7 +49,7 @@ export default function LeaderCard({ listing }: { listing: Listing }) {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  window.open(listing.website, "_blank", "noopener,noreferrer");
+                  window.open(listing.website as string, "_blank", "noopener,noreferrer");
                 }}
                 className="text-golddeep font-semibold underline-offset-2 hover:underline"
               >
