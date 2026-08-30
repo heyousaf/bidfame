@@ -10,6 +10,12 @@ declare global {
         openInvoice: (url: string, callback: (status: string) => void) => void;
         HapticFeedback?: { notificationOccurred: (type: string) => void };
         showAlert?: (msg: string) => void;
+        BackButton?: {
+          show: () => void;
+          hide: () => void;
+          onClick: (cb: () => void) => void;
+          offClick: (cb: () => void) => void;
+        };
       };
     };
   }
