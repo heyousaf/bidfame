@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { Listing } from "@/lib/types";
 import { getInitData, getTelegramWebApp, openInvoice } from "@/lib/telegramClient";
 
 export default function ListingDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
 
   const [listing, setListing] = useState<Listing | null>(null);
@@ -16,8 +18,19 @@ export default function ListingDetailPage() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    getTelegramWebApp()?.ready();
+    const tg = getTelegramWebApp();
+    tg?.ready();
     load();
+
+    // Show Telegram's native back button (top-left chevron) while this page is open.
+    tg?.BackButton?.show();
+    const handleBack = () => router.push("/");
+    tg?.BackButton?.onClick(handleBack);
+
+    return () => {
+      tg?.BackButton?.offClick(handleBack);
+      tg?.BackButton?.hide();
+    };
   }, [id]);
 
   async function load() {
@@ -68,6 +81,13 @@ export default function ListingDetailPage() {
 
   return (
     <main className="max-w-[480px] mx-auto px-4 pt-7 pb-16">
+      <Link
+        href="/"
+        className="inline-flex items-center gap-1 text-sm font-semibold text-black/50 mb-4"
+      >
+        ← Back
+      </Link>
+
       <div className="card rounded-3xl p-6 text-center mb-6">
         <div className="w-28 h-28 mx-auto rounded-2xl overflow-hidden bg-surfacealt flex items-center justify-center mb-4">
           {listing.imageUrl ? (
