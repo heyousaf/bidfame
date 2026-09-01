@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getInitData, getTelegramWebApp } from "@/lib/telegramClient";
@@ -23,13 +22,27 @@ export default function ProfilePage() {
     })();
   }, []);
 
-  if (loading) return <main className="max-w-[480px] mx-auto px-4 pt-10 text-center text-black/40">Loading…</main>;
+  if (loading) return (
+    <main className="max-w-[480px] mx-auto px-4 pt-10 text-center text-black/40">
+      Loading…
+    </main>
+  );
 
   return (
     <main className="max-w-[480px] mx-auto px-4 pt-7 pb-16">
       <h1 className="font-display text-2xl font-extrabold mb-1">
         👤 {data?.user?.firstName || data?.user?.username || "My Profile"}
       </h1>
+
+      {/* ADMIN BUTTON — sirf admin ko dikhega */}
+      {data?.user?.isAdmin && (
+        <Link
+          href="/admin"
+          className="block text-center bg-black text-white font-bold py-3 rounded-full mb-4 mt-2"
+        >
+          ⚙️ Admin Dashboard
+        </Link>
+      )}
 
       {!data?.listing ? (
         <div className="mt-8 text-center">
@@ -66,11 +79,17 @@ export default function ProfilePage() {
             🔥 Increase Bid
           </Link>
 
-          <h2 className="font-semibold text-sm uppercase tracking-wide text-black/50 mb-2">Bid History</h2>
-          {data.bids.length === 0 && <p className="text-sm text-black/40">No bids yet.</p>}
+          <h2 className="font-semibold text-sm uppercase tracking-wide text-black/50 mb-2">
+            Bid History
+          </h2>
+          {data.bids.length === 0 && (
+            <p className="text-sm text-black/40">No bids yet.</p>
+          )}
           {data.bids.map((b: any) => (
             <div key={b.id} className="flex justify-between text-sm py-2 border-b border-black/5">
-              <span className="text-black/50">{new Date(b.createdAt).toLocaleDateString()}</span>
+              <span className="text-black/50">
+                {new Date(b.createdAt).toLocaleDateString()}
+              </span>
               <span className="font-semibold">
                 {b.previousBid} → {b.amountStars} ⭐
               </span>
