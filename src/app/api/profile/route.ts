@@ -3,46 +3,38 @@ import { prisma } from "@/lib/prisma";
 import { requireTelegramUser } from "@/lib/telegramAuth";
 
 export async function POST(req: NextRequest) {
-  // POST because we need to send initData in the body (can't put it in a GET query safely/easily)
   try {
     const { initData } = await req.json();
     const tgUser = requireTelegramUser(initData);
 
     const user = await prisma.user.upsert({
-  where: { telegramId: String(tgUser.id) },
-  update: {
-    username: tgUser.username ?? null,
-    firstName: tgUser.first_name ?? null,
-    lastName: tgUser.last_name ?? null,
-  },
-  create: {
-    telegramId: String(tgUser.id),
-    username: tgUser.username ?? null,
-    firstName: tgUser.first_name ?? null,
-    lastName: tgUser.last_name ?? null,
-  },
-  include: {
-    listings: true,
-    bids: {
-      where: { status: "SUCCESS" },
-      orderBy: { createdAt: "desc" },
-      select: { id: true, amountStars: true, previousBid: true, createdAt: true, listingId: true },
-    },
-  },
-});
+      where: { telegramId: String(tgUser.id) },
+      update: {
+        username: tgUser.username ?? null,
+        firstName: tgUser.first_name ?? null,
+        lastName: tgUser.last_name ?? null,
+      },
+      create: {
+        telegramId: String(tgUser.id),
+        username: tgUser.username ?? null,
+        firstName: tgUser.first_name ?? null,
+        lastName: tgUser.last_name ?? null,
+      },
       include: {
         listings: true,
         bids: {
           where: { status: "SUCCESS" },
           orderBy: { createdAt: "desc" },
-          select: { id: true, amountStars: true, previousBid: true, createdAt: true, listingId: true },
+          select: {
+            id: true,
+            amountStars: true,
+            previousBid: true,
+            createdAt: true,
+            listingId: true,
+          },
         },
       },
     });
-
-    if (!user) {
-      return NextResponse.json({ user: null, listing: null, bids: [], totalStarsSpent: 0 });
-    }
 
     const listing = user.listings[0] || null;
     let rank: number | null = null;
@@ -56,12 +48,12 @@ export async function POST(req: NextRequest) {
     const totalStarsSpent = user.bids.reduce((sum, b) => sum + b.amountStars, 0);
 
     return NextResponse.json({
-      user: { 
-  telegramId: user.telegramId, 
-  username: user.username, 
-  firstName: user.firstName,
-  isAdmin: String(user.telegramId) === process.env.ADMIN_ID,
-},
+      user: {
+        telegramId: user.telegramId,
+        username: user.username,
+        firstName: user.firstName,
+        isAdmin: String(user.telegramId) === process.env.ADMIN_ID,
+      },
       listing,
       rank,
       bids: user.bids,
