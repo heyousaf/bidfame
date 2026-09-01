@@ -8,8 +8,28 @@ export async function POST(req: NextRequest) {
     const { initData } = await req.json();
     const tgUser = requireTelegramUser(initData);
 
-    const user = await prisma.user.findUnique({
-      where: { telegramId: String(tgUser.id) },
+    const user = await prisma.user.upsert({
+  where: { telegramId: String(tgUser.id) },
+  update: {
+    username: tgUser.username ?? null,
+    firstName: tgUser.first_name ?? null,
+    lastName: tgUser.last_name ?? null,
+  },
+  create: {
+    telegramId: String(tgUser.id),
+    username: tgUser.username ?? null,
+    firstName: tgUser.first_name ?? null,
+    lastName: tgUser.last_name ?? null,
+  },
+  include: {
+    listings: true,
+    bids: {
+      where: { status: "SUCCESS" },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, amountStars: true, previousBid: true, createdAt: true, listingId: true },
+    },
+  },
+});
       include: {
         listings: true,
         bids: {
