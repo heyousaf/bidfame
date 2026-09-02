@@ -22,15 +22,16 @@ export default function ProfilePage() {
     })();
   }, []);
 
-  if (loading) return (
-    <main className="max-w-[480px] mx-auto px-4 pt-10 text-center text-black/40">
-      Loading…
-    </main>
-  );
+  if (loading) {
+    return (
+      <main className="max-w-[480px] mx-auto px-4 pt-10 text-center text-black/40">
+        Loading…
+      </main>
+    );
+  }
 
   return (
     <main className="max-w-[480px] mx-auto px-4 pt-7 pb-16">
-
       <Link href="/" className="inline-flex items-center gap-1 text-sm font-semibold text-black/50 mb-4">
         ← Back
       </Link>
@@ -39,19 +40,16 @@ export default function ProfilePage() {
         👤 {data?.user?.firstName || data?.user?.username || "My Profile"}
       </h1>
 
-      {/* ADMIN BUTTON */}
       {data?.user?.isAdmin && (
         <Link href="/admin" className="block text-center bg-black text-white font-bold py-3 rounded-full mb-3 mt-2">
           ⚙️ Admin Dashboard
         </Link>
       )}
 
-      {/* EDIT BUTTON */}
       <Link href="/edit" className="block text-center border border-black/20 text-black font-bold py-3 rounded-full mb-4">
         ✏️ Edit My Listing
       </Link>
 
-      {/* #1 SPECIAL CARD */}
       {Number(data?.rank) === 1 && (
         <div className="rounded-2xl p-5 mb-4 text-center" style={{ background: "linear-gradient(135deg, #1a0a3c, #7c3aed)" }}>
           <div className="text-5xl mb-2">👑</div>
@@ -117,4 +115,23 @@ export default function ProfilePage() {
           </Link>
 
           <h2 className="font-semibold text-sm uppercase tracking-wide text-black/50 mb-2">
-            Bid
+            Bid History
+          </h2>
+          {data.bids.length === 0 && (
+            <p className="text-sm text-black/40">No bids yet.</p>
+          )}
+          {data.bids.map((b: any) => (
+            <div key={b.id} className="flex justify-between text-sm py-2 border-b border-black/5">
+              <span className="text-black/50">
+                {new Date(b.createdAt).toLocaleDateString()}
+              </span>
+              <span className="font-semibold">
+                {b.previousBid} → {b.amountStars} ⭐
+              </span>
+            </div>
+          ))}
+        </>
+      )}
+    </main>
+  );
+}
