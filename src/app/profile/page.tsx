@@ -43,7 +43,12 @@ export default function ProfilePage() {
           ⚙️ Admin Dashboard
         </Link>
       )}
-
+<Link
+  href="/edit"
+  className="block text-center border border-black/20 text-black font-bold py-3 rounded-full mb-4"
+>
+  ✏️ Edit My Listing
+</Link>
       {!data?.listing ? (
         <div className="mt-8 text-center">
           <p className="text-black/50 mb-4">You don't have a listing yet.</p>
