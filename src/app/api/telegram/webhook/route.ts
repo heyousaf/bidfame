@@ -14,7 +14,6 @@ async function tg(method: string, body: Record<string, unknown>) {
 }
 
 export async function POST(req: NextRequest) {
-  // Verify this request actually came from Telegram.
   const secret = req.headers.get("x-telegram-bot-api-secret-token");
   if (secret !== process.env.TELEGRAM_WEBHOOK_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -23,7 +22,6 @@ export async function POST(req: NextRequest) {
   const update = await req.json();
 
   try {
-    // ── /start, /help, /leaderboard, /myprofile ──────────────────────
     if (update.message?.text) {
       const chatId = update.message.chat.id;
       const text: string = update.message.text.trim();
@@ -40,10 +38,7 @@ export async function POST(req: NextRequest) {
       } else if (text.startsWith("/help")) {
         await tg("sendMessage", {
           chat_id: chatId,
-          text:
-            "BIDFAME — pay-to-lead visibility leaderboard.\n\n" +
-            "Bid Telegram Stars to take the #1 spot and get featured.\n\n" +
-            "Commands:\n/leaderboard — view the leaderboard\n/myprofile — view your listing & bid history",
+          text: "BIDFAME — pay-to-lead visibility leaderboard.\n\nBid Telegram Stars to take the #1 spot and get featured.\n\nCommands:\n/leaderboard — view the leaderboard\n/myprofile — view your listing & bid history",
         });
       } else if (text.startsWith("/leaderboard")) {
         await tg("sendMessage", {
@@ -65,7 +60,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    // ── pre_checkout_query: must answer within 10s. Re-validate everything. ──
     if (update.pre_checkout_query) {
       const pcq = update.pre_checkout_query;
       const payload: string = pcq.invoice_payload;
@@ -88,8 +82,6 @@ export async function POST(req: NextRequest) {
         ok = false;
         errorMessage = "Bid amount has changed. Please try again.";
       } else {
-        // Re-check the bid is still the current valid required amount
-        // (protects against stale invoices after someone else already outbid).
         const highest = await prisma.listing.aggregate({
           where: { active: true },
           _max: { currentBid: true },
@@ -110,7 +102,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    // ── successful_payment: the ONLY place a bid becomes real ──────────
     const successfulPayment = update.message?.successful_payment;
     if (successfulPayment) {
       const payload: string = successfulPayment.invoice_payload;
@@ -119,17 +110,18 @@ export async function POST(req: NextRequest) {
       const totalAmount: number = successfulPayment.total_amount;
       const currency: string = successfulPayment.currency;
 
+      let newTopUserId: string | null = null;
+      let prevTopUserId: string | null = null;
+      let newTopListingId: string | null = null;
+      let paidAmount = 0;
+
       await prisma.$transaction(async (tx) => {
         const payment = await tx.payment.findUnique({
           where: { invoicePayload: payload },
           include: { bid: true, listing: true },
         });
 
-        if (!payment || !payment.bid) return; // unknown payload — ignore safely
-
-        // IDEMPOTENCY: if this payment was already finalized, do nothing.
-        // The unique constraint on Payment.telegramPaymentId also guarantees
-        // this at the DB level even under concurrent webhook deliveries.
+        if (!payment || !payment.bid) return;
         if (payment.status === "SUCCESS") return;
 
         if (currency !== "XTR" || totalAmount !== payment.amountStars) {
@@ -138,23 +130,18 @@ export async function POST(req: NextRequest) {
           return;
         }
 
-        // Re-verify against the CURRENT highest bid inside the transaction to
-        // guard against race conditions (two users paying near-simultaneously).
+        // Find current #1 BEFORE update — to notify them they got outbid
         const currentTop = await tx.listing.findFirst({
           where: { active: true },
           orderBy: { currentBid: "desc" },
-          select: { currentBid: true },
+          include: { user: true },
         });
-        const currentHighest = currentTop?.currentBid ?? 0;
 
-        if (payment.amountStars <= currentHighest) {
-          // This payment is now stale (someone else already took a higher spot
-          // while this payment was in flight). We still honor the Stars already
-          // paid — mark bid SUCCESS and update the listing's bid — Stars were
-          // real money and must not be silently discarded — but it will simply
-          // not be #1 if it's below the new highest. Ranking is always purely
-          // by currentBid, so this resolves itself automatically.
+        if (currentTop && currentTop.currentBid > 0 && currentTop.userId !== payment.listing.userId) {
+          prevTopUserId = currentTop.user.telegramId;
         }
+
+        paidAmount = payment.amountStars;
 
         await tx.payment.update({
           where: { id: payment.id },
@@ -181,7 +168,47 @@ export async function POST(req: NextRequest) {
             bidCount: { increment: 1 },
           },
         });
+
+        // Find new #1 AFTER update
+        const newTop = await tx.listing.findFirst({
+          where: { active: true },
+          orderBy: { currentBid: "desc" },
+          include: { user: true },
+        });
+
+        if (newTop) {
+          newTopUserId = newTop.user.telegramId;
+          newTopListingId = newTop.id;
+        }
       });
+
+      // Notify previous #1 — outbid hua
+      if (prevTopUserId) {
+        await tg("sendMessage", {
+          chat_id: prevTopUserId,
+          text: `😤 *Someone just outbid you on BIDFAME!*\n\nYou are no longer #1.\n\nPlace a higher bid to take back the top spot! 🔥`,
+          parse_mode: "Markdown",
+          reply_markup: {
+            inline_keyboard: [[
+              { text: "🔥 Take Back #1", web_app: { url: WEBAPP_URL } }
+            ]],
+          },
+        });
+      }
+
+      // Notify new #1 — congratulations
+      if (newTopUserId) {
+        await tg("sendMessage", {
+          chat_id: newTopUserId,
+          text: `👑 *YOU ARE NOW #1 ON BIDFAME!*\n\n⭐ *${paidAmount.toLocaleString()} Stars*\n\nYou hold the top spot!\nDownload your Story Card and flex on Instagram 📸\n\nStay alert — someone might outbid you! 🔥`,
+          parse_mode: "Markdown",
+          reply_markup: {
+            inline_keyboard: [[
+              { text: "👑 View My Profile", web_app: { url: `${WEBAPP_URL}/profile` } }
+            ]],
+          },
+        });
+      }
 
       return NextResponse.json({ ok: true });
     }
@@ -189,8 +216,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Webhook error:", err);
-    // Still 200 so Telegram doesn't hammer retries for a bug on our side while we fix it —
-    // but log loudly. (If you'd rather Telegram retry, return 500 instead.)
     return NextResponse.json({ ok: true });
   }
 }
