@@ -1,5 +1,4 @@
 "use client";
-
 declare global {
   interface Window {
     Telegram?: {
@@ -8,6 +7,7 @@ declare global {
         ready: () => void;
         expand: () => void;
         openInvoice: (url: string, callback: (status: string) => void) => void;
+        openLink?: (url: string, options?: { try_instant_view?: boolean }) => void;
         HapticFeedback?: { notificationOccurred: (type: string) => void };
         showAlert?: (msg: string) => void;
         BackButton?: {
@@ -20,16 +20,13 @@ declare global {
     };
   }
 }
-
 export function getTelegramWebApp() {
   if (typeof window === "undefined") return null;
   return window.Telegram?.WebApp || null;
 }
-
 export function getInitData(): string {
   return getTelegramWebApp()?.initData || "";
 }
-
 export function openInvoice(link: string): Promise<"paid" | "cancelled" | "failed" | "pending"> {
   return new Promise((resolve) => {
     const wa = getTelegramWebApp();
