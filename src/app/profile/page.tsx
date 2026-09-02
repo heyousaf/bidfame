@@ -69,7 +69,7 @@ export default function ProfilePage() {
             </a>
             <button
               onClick={() => {
-                getTelegramWebApp()?.openLink(
+                getTelegramWebApp()?.openLink?.(
                   `https://t.me/share/url?url=https://t.me/BIDFAME_bot&text=👑 I am %231 on BIDFAME with ${data?.listing?.currentBid?.toLocaleString()} ⭐ Stars! Challenge me! 🔥`
                 );
               }}
