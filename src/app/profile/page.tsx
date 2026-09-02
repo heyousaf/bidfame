@@ -60,7 +60,7 @@ export default function ProfilePage() {
             ⭐ {data?.listing?.currentBid?.toLocaleString()} Stars
           </div>
           <div className="flex gap-2 justify-center flex-wrap">
-            
+            <a
               href={`/api/story-card?listingId=${data?.listing?.id}`}
               target="_blank"
               className="bg-yellow-400 text-black font-bold px-4 py-2 rounded-full text-sm"
