@@ -30,6 +30,13 @@ export default function ProfilePage() {
 
   return (
     <main className="max-w-[480px] mx-auto px-4 pt-7 pb-16">
+      {/* BACK BUTTON */}
+      <Link
+        href="/"
+        className="inline-flex items-center gap-1 text-sm font-semibold text-black/50 mb-4"
+      >
+        ← Back
+      </Link>
       <h1 className="font-display text-2xl font-extrabold mb-1">
         👤 {data?.user?.firstName || data?.user?.username || "My Profile"}
       </h1>
